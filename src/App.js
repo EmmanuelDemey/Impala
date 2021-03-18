@@ -1,23 +1,41 @@
-import logo from './logo.svg';
 import './App.css';
+import { useEffect, useLayoutEffect, useState } from 'react';
+
 
 function App() {
+  const [queries, setQueries] = useState([])
+  const [yasgui, setYasgui] = useState()
+
+  const click = (query) => {
+    fetch(query.path)
+      .then(response => response.text())
+      .then(body => {
+        const tab = yasgui.getTab();
+        tab.setQuery(body);
+      })  
+  }
+
+  useEffect(() => {
+    fetch("/queries/queries.json")
+      .then(response => response.json())
+      .then(body => {
+        setQueries(body)
+      })
+  }, []);
+
+  useLayoutEffect(() => {
+    // eslint-disable-next-line no-undef
+    setYasgui(new Yasgui(document.getElementById("editor")))
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="queries-block">
+        {
+          queries.map((query, i) => <button key={i} onClick={() => click(query)}> {query.label}  </button>)
+        }
+      </div>
+      <div id="editor"></div>
     </div>
   );
 }
